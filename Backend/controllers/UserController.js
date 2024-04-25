@@ -137,7 +137,14 @@ module.exports = class UserController {
      static async editUser(req, res){
 
         const {name, email, phone, password, confirmpassword} = req.body
-        
+
+        const id = req.params.id
+
+        if(req.id !== id){
+            res.status(422).json({message: 'O token e o ID nao conferem'})
+            return
+        }
+
         const user = await User.findById(req.id)
         
         if(!name){
@@ -161,7 +168,6 @@ module.exports = class UserController {
 
         user.email = email
 
-        
         if(!phone){
             res.status(422).json({message: 'O telefone é obrigatorio!'})
             return
