@@ -16,8 +16,13 @@ router.get('/mypets', checkToken, PetController.getAllUserPets)
 router.get('/:id', PetController.getPetbyId)
 
 //remove by ID
-
 router.delete('/:id', checkToken, PetController.removebyId)
+
+//atualizar pet
+router.patch('/:id', checkToken, PetController.updatePet)
+
+//marcar visita
+router.patch('/schedule/:id', checkToken, PetController.schedule)
 
 
 module.exports = router

@@ -101,11 +101,13 @@ module.exports = class PetController {
 
         const id = req.params.id
 
+        //valid ID
         if(!ObjectID.isValid(id)){
             res.status(422).json({message: 'ID invalido!'})
             return
         }
 
+        //check pet exists
         const pet = await Pet.findOne({_id: id})
 
         if(!pet){
@@ -113,6 +115,100 @@ module.exports = class PetController {
             return  
         }
         
+        //check user pet
 
+        const user = await User.findById(req.id)
+
+        if(pet.user._id.toString() !== user._id.toString()){
+            res.status(422).json({message: 'Erro ao encontrar seu pet!'})
+            return
+        }
+
+        await Pet.findByIdAndDelete(id)
+
+        res.status(200).json({message: 'Pet removido do sistema!'})
+    }
+
+    static async updatePet(req, res){
+
+        const id = req.params.id
+
+        //valid ID
+        if(!ObjectID.isValid(id)){
+            res.status(422).json({message: 'ID invalido!'})
+            return
+        }
+
+        //check pet exists
+        const pet = await Pet.findOne({_id: id})
+
+        if(!pet){
+            res.status(404).json({message: 'Pet nao encontrado!'})
+            return  
+        }
+        
+        //check user pet
+
+        const user = await User.findById(req.id)
+
+        if(pet.user._id.toString() !== user._id.toString()){
+            res.status(422).json({message: 'Erro ao encontrar seu pet!'})
+            return
+        }
+
+        const {name, age, weight, color} = req.body
+
+        const updatedData = {}
+
+        const available = true
+
+         // validacoes
+         if(name){
+            updatedData.name = name
+        } 
+
+        if(age){
+            updatedData.age = age
+        }
+
+        if(weight){
+            updatedData.weight = weight
+        }
+
+        if(color){
+            updatedData.calor = color
+        }
+
+        await Pet.findByIdAndUpdate(id, updatedData)
+
+        res.status(200).json({message: 'Pet atualizada com sucesso!'})
+    }
+
+    static async schedule(req,res){
+
+        const id = req.params.id
+
+        //valid ID
+        if(!ObjectID.isValid(id)){
+            res.status(422).json({message: 'ID invalido!'})
+            return
+        }
+
+        //check pet exists
+        const pet = await Pet.findById(id)
+
+        if(!pet){
+            res.status(404).json({message: 'Pet nao encontrado!'})
+            return  
+        }
+
+        //check user
+
+        const user = await User.findById(req.id)
+
+        if(pet.user._id.equals(user._id)){
+            res.status(422).json({message: 'Nao é possivel agendar uma visita com seu proprio pet!'})
+            return
+        }
     }
 }
