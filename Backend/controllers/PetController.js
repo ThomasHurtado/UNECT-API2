@@ -202,7 +202,7 @@ module.exports = class PetController {
             return  
         }
 
-        //check user
+        //check user registerd the pet
 
         const user = await User.findById(req.id)
 
@@ -210,5 +210,56 @@ module.exports = class PetController {
             res.status(422).json({message: 'Nao é possivel agendar uma visita com seu proprio pet!'})
             return
         }
+
+        //check user visit
+
+        if(pet.adopter){
+            if(pet.adopter._id.equals(user._id)){
+                res.status(422).json({message: "Voce ja agendou uma visita com esse pet!"})
+                return
+            }
+        }
+
+        pet.adopter = {
+            _id: user._id,
+            name: user.name
+        }
+
+        await Pet.findByIdAndUpdate(id, pet)
+
+        res.status(200).json({message: `A visita foi agendada com sucesso, entre em contato com ${pet.user.name} pelo numero ${pet.user.phone}`})
+    }
+
+    static async conclude(req, res){
+
+        const id = req.params.id
+
+        //valid ID
+        if(!ObjectID.isValid(id)){
+            res.status(422).json({message: 'ID invalido!'})
+            return
+        }
+
+        //check pet exists
+        const pet = await Pet.findById(id)
+
+        if(!pet){
+            res.status(404).json({message: 'Pet nao encontrado!'})
+            return  
+        }
+
+        const user = await User.findById(req.id)
+
+        if(pet.user._id.equals(user._id)){
+            res.status(422).json({message: 'Houve um problema em processar od ados, tente novamente!'})
+            return
+        }
+
+        pet.available = false
+
+        await Pet.findByIdAndUpdate(id, pet)
+
+        res.status(200).json({message: `Seu pet ${pet.name} foi adotado por ${pet.adopter.name}`})
+
     }
 }

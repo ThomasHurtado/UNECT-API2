@@ -24,5 +24,8 @@ router.patch('/:id', checkToken, PetController.updatePet)
 //marcar visita
 router.patch('/schedule/:id', checkToken, PetController.schedule)
 
+//concluir adoção
+router.patch('/conclude/:id', checkToken, PetController.conclude)
+
 
 module.exports = router
